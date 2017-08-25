@@ -17,13 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Log;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jim
- * Date: 1/21/13
- * Time: 3:18 PM
- * To change this template use File | Settings | File Templates.
- */
+
 public class TrackingFragment extends Fragment implements LocationListener {
     final static String LOGTAG = "Location Monitoring";
 
@@ -35,6 +29,7 @@ public class TrackingFragment extends Fragment implements LocationListener {
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
+        setRetainInstance(true);
     }
 
     @Override
@@ -83,8 +78,11 @@ public class TrackingFragment extends Fragment implements LocationListener {
 
     private void doStartTracking() {
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        HandlerThread thread = new HandlerThread("locationthread");
+        thread.start();
+        _looper = thread.getLooper();
 
-        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this,_looper);
 
 
     }
@@ -92,6 +90,11 @@ public class TrackingFragment extends Fragment implements LocationListener {
     private void doStopTracking() {
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         lm.removeUpdates(this);
+
+        if (_looper != null) {
+            _looper.quit();
+            _looper = null;
+        }
     }
 
     public void setLocation(Location location) {
@@ -113,7 +116,17 @@ public class TrackingFragment extends Fragment implements LocationListener {
     }
 
     public void onLocationChanged(Location location) {
-        setLocation(location);
+        Log.d(LOGTAG, "Location Monitoring Fragment onLocationChanged -" + LogHelper.threadId());
+
+        final Location theLocation = location;
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setLocation(theLocation);
+            }
+        });
+
 
     }
 

@@ -3,6 +3,7 @@ package com.example.vii_mook.locationthreading;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
+import android.util.Log;
 
 /**
  * Created by vii-mook on 8/24/2017 AD.
@@ -18,6 +19,16 @@ public class MainActivityLocationListener implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
+
+        Log.d(LOGTAG, "Location Monitoring Activity onLocationChange -" + LogHelper.threadId());
+
+        final Location theLocation = location;
+        trackingActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                trackingActivity.setLocation(theLocation);
+            }
+        });
 
     }
 

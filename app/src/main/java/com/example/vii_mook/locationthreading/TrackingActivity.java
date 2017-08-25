@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
@@ -26,6 +27,16 @@ public class TrackingActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking);
+
+        LocationState state = (LocationState) getLastNonConfigurationInstance();
+        if (state != null) {
+            looper = state.getLooper();
+            locationListener = state.getLocationListener();
+
+            if (locationListener != null) {
+                locationListener.setTrackingActivity(this);
+            }
+        }
     }
 
     @Override
@@ -35,6 +46,10 @@ public class TrackingActivity extends Activity {
         return true;
     }
 
+    @Override
+    public Object onRetainNonConfigurationInstance() {
+        return new LocationState(looper, locationListener);
+    }
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
@@ -101,6 +116,11 @@ public class TrackingActivity extends Activity {
         if (locationListener != null) {
             lm.removeUpdates(locationListener);
             locationListener = null;
+        }
+
+        if (looper != null) {
+            looper.quit();
+            looper = null;
         }
 
     }

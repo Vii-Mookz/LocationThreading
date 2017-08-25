@@ -11,6 +11,7 @@ import android.view.MenuItem;
 
 public class MainActivity extends Activity {
     final static String LOGTAG = "Location Monitoring";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
